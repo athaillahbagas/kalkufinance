@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalku Finance — kalkulator edukasi</title>
+    <meta name="description" content="Prototipe edukasi: jelajahi ROI, pinjaman, dana pensiun, estimasi PPh 21 tahunan, dan bunga majemuk.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: white;
+            color: #1e3c72;
+        }
+
+        .calculator-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .calculator-card.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .info-text {
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .breakdown-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .breakdown-table th,
+        .breakdown-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .breakdown-table th {
+            font-weight: 700;
+        }
+
+        /* Restrained palette and responsive corrections; retain the original layout. */
+        body { background: #f4f6f5; color: #18362f; line-height: 1.55; }
+        .container { max-width: 860px; }
+        h1 { color: #18362f; text-shadow: none; margin-bottom: 8px; }
+        h2 { font-size: 1.4rem; line-height: 1.35; }
+        .intro { max-width: 680px; margin: 0 auto 24px; text-align: center; color: #4d625c; }
+        .tab { background: #e6ece9; color: #234c40; padding: 12px 16px; min-height: 44px; }
+        .tab:hover { background: #d8e3dd; transform: none; }
+        .tab.active { background: #245b48; color: white; }
+        .calculator-card { border: 1px solid #dbe4df; box-shadow: 0 8px 26px rgba(24,54,47,.06); border-radius: 16px; }
+        .scope { color: #52665e; margin: 12px 0 24px; font-size: .95rem; }
+        .btn { background: #245b48; min-height: 48px; }
+        .btn:hover { background: #1b4939; transform: none; box-shadow: none; }
+        .result-box { background: #eaf3ee; color: #163c2e; }
+        .result-item { gap: 16px; flex-wrap: wrap; border-color: #c9ddd0; }
+        .result-value { overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+        .result-box.error { color: #802d22; background: #fff0ed; border: 1px solid #d5a49a; }
+        .result-note { margin-top: 16px; font-size: .9rem; }
+        .info-text { color: #586961; }
+        input, select { min-width: 0; max-width: 100%; }
+        input:focus, select:focus, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #557969; outline-offset: 3px; border-color: #557969; }
+        .tax-sources { margin-top: 20px; color: #4d625c; font-size: .9rem; }
+        .tax-sources p { margin-top: 12px; }
+        summary { cursor: pointer; padding: 8px 0; }
+        a { color: #245b48; text-underline-offset: 3px; }
+        footer { margin: 24px auto; color: #586961; font-size: .85rem; max-width: 730px; text-align: center; }
+        @media (max-width: 480px) { body { padding: 12px; } .calculator-card { padding: 20px; } .tabs { gap: 8px; } .tab { font-size: .9rem; } .result-box { padding: 18px; } .result-item { gap: 4px; } .result-value { width: 100%; } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kalku Finance</h1>
+        <p class="intro">Lima kalkulator sederhana untuk mengeksplorasi skenario keuangan. Prototipe edukasi, bukan rekomendasi keuangan atau layanan pelaporan pajak.</p>
+        
+        <nav class="tabs" aria-label="Pilih kalkulator">
+            <button class="tab active" type="button" data-panel="investasi" aria-controls="investasi" aria-pressed="true" onclick="switchTab('investasi')">📈 Investasi</button>
+            <button class="tab" type="button" data-panel="kredit" aria-controls="kredit" aria-pressed="false" onclick="switchTab('kredit')">🏦 Kredit/Pinjaman</button>
+            <button class="tab" type="button" data-panel="pensiun" aria-controls="pensiun" aria-pressed="false" onclick="switchTab('pensiun')">👴 Dana Pensiun</button>
+            <button class="tab" type="button" data-panel="pajak" aria-controls="pajak" aria-pressed="false" onclick="switchTab('pajak')">📋 PPh 21 Tahunan</button>
+            <button class="tab" type="button" data-panel="bunga" aria-controls="bunga" aria-pressed="false" onclick="switchTab('bunga')">💵 Bunga Majemuk</button>
+        </nav>
+
+        <!-- Kalkulator Investasi -->
+        <section aria-labelledby="heading-investasi" id="investasi" class="calculator-card active">
+            <h2 id="heading-investasi">📈 Kalkulator Return Investasi (ROI)</h2>
+            <p class="scope">ROI dihitung dari laba/rugi dibagi modal awal + biaya. Nilai akhir dan biaya harus mencakup komponen yang ingin Anda bandingkan.</p>
+            <div class="form-group">
+                <label for="inv-modal">Modal Awal (Rp)</label>
+                <input type="number" id="inv-modal" value="10000000" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="inv-akhir">Nilai Akhir Investasi (Rp)</label>
+                <input type="number" id="inv-akhir" value="15000000" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="inv-biaya">Biaya Investasi (Rp)</label>
+                <input type="number" id="inv-biaya" value="0" min="0" required>
+                <div class="info-text">Fee, komisi, atau biaya lainnya</div>
+            </div>
+            <button type="button" class="btn" onclick="hitungInvestasi()">Hitung ROI</button>
+            <div id="result-investasi" class="result-box" role="status" aria-live="polite" tabindex="-1"></div>
+        </section>
+
+        <!-- Kalkulator Kredit -->
+        <section aria-labelledby="heading-kredit" id="kredit" class="calculator-card">
+            <h2 id="heading-kredit">🏦 Kalkulator Kredit/Pinjaman</h2>
+            <p class="scope">Bunga tetap nominal tahunan ÷ 12, cicilan pada akhir bulan. Belum memasukkan biaya, denda, atau perubahan bunga. Durasi harus berupa jumlah bulan utuh, maksimal 100 tahun.</p>
+            <div class="form-group">
+                <label for="kredit-jumlah">Jumlah Pinjaman (Rp)</label>
+                <input type="number" id="kredit-jumlah" value="100000000" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="kredit-bunga">Bunga nominal per tahun (%)</label>
+                <input type="number" id="kredit-bunga" value="8" step="any" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="kredit-tahun">Jangka Waktu (Tahun)</label>
+                <input type="number" id="kredit-tahun" step="any" value="10" min="0" required>
+            </div>
+            <button type="button" class="btn" onclick="hitungKredit()">Hitung Cicilan</button>
+            <div id="result-kredit" class="result-box" role="status" aria-live="polite" tabindex="-1"></div>
+        </section>
+
+        <!-- Kalkulator Pensiun -->
+        <section aria-labelledby="heading-pensiun" id="pensiun" class="calculator-card">
+            <h2 id="heading-pensiun">👴 Kalkulator Dana Pensiun</h2>
+            <p class="scope">Asumsi nominal tahunan ÷ 12 diterapkan pada modal awal dan setoran akhir bulan. Nilai rupiah belum disesuaikan inflasi; hasil bukan jaminan. Rentang perhitungan maksimal 100 tahun.</p>
+            <div class="form-group">
+                <label for="pensiun-usia">Usia Sekarang (Tahun)</label>
+                <input type="number" id="pensiun-usia" value="30" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="pensiun-target">Usia Pensiun (Tahun)</label>
+                <input type="number" id="pensiun-target" value="60" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="pensiun-target-dana">Dana yang Dibutuhkan Saat Pensiun (Rp)</label>
+                <input type="number" id="pensiun-target-dana" value="5000000000" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="pensiun-return">Asumsi imbal hasil nominal per tahun (%)</label>
+                <input type="number" id="pensiun-return" value="10" step="any" min="-99.999" required>
+            </div>
+            <div class="form-group">
+                <label for="pensiun-modal">Tabungan Saat Ini (Rp)</label>
+                <input type="number" id="pensiun-modal" value="50000000" min="0" required>
+            </div>
+            <button type="button" class="btn" onclick="hitungPensiun()">Hitung Dana Pensiun</button>
+            <div id="result-pensiun" class="result-box" role="status" aria-live="polite" tabindex="-1"></div>
+        </section>
+
+        <!-- Kalkulator Pajak -->
+        <section aria-labelledby="heading-pajak" id="pajak" class="calculator-card">
+            <h2 id="heading-pajak">📋 Estimasi PPh 21 Tahunan</h2>
+            <p class="scope">Estimasi TAHUNAN sederhana untuk pegawai tetap dalam negeri, satu pemberi kerja, dan 12 bulan penghasilan tetap. Angka per bulan adalah estimasi tahunan ÷ 12, bukan potongan payroll TER aktual.</p>
+            <div class="form-group">
+                <label for="pajak-gaji">Gaji per Bulan (Rp)</label>
+                <input type="number" id="pajak-gaji" value="10000000" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="pajak-status">Status PTKP pada awal tahun</label>
+                <select id="pajak-status">
+                    <option value="TK0">TK/0 - Tidak Kawin, Tanpa Tanggungan</option>
+                    <option value="TK1">TK/1 - Tidak Kawin, 1 Tanggungan</option>
+                    <option value="TK2">TK/2 - Tidak Kawin, 2 Tanggungan</option>
+                    <option value="TK3">TK/3 - Tidak Kawin, 3 Tanggungan</option>
+                    <option value="K0">K/0 - Kawin, Tanpa Tanggungan</option>
+                    <option value="K1">K/1 - Kawin, 1 Tanggungan</option>
+                    <option value="K2">K/2 - Kawin, 2 Tanggungan</option>
+                    <option value="K3">K/3 - Kawin, 3 Tanggungan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="pajak-tunjangan">Tunjangan (Rp/bulan)</label>
+                <input type="number" id="pajak-tunjangan" value="0" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="pajak-iuran">Iuran pensiun/JHT/JP yang memenuhi syarat (Rp/bulan)</label>
+                <input type="number" id="pajak-iuran" value="0" min="0" required>
+                <p class="info-text">Hanya bagian pegawai yang dibayar melalui pemberi kerja kepada penyelenggara yang memenuhi ketentuan. Tidak termasuk BPJS Kesehatan.</p>
+            </div>
+            <button type="button" class="btn" onclick="hitungPajak()">Hitung Pajak</button>
+            <details class="tax-sources">
+                <summary>Asumsi dan sumber pajak</summary>
+                <p>Biaya jabatan 5% dari bruto, maksimal Rp6.000.000 per tahun. PTKP mengikuti status yang dipilih, tanpa penggabungan penghasilan pasangan. PKP setelah pengurangan dibulatkan ke bawah ke ribuan rupiah penuh, minimal nol.</p>
+                <p>Tarif progresif: 5% hingga Rp60 juta; 15% untuk lapisan di atas Rp60–250 juta; 25% di atas Rp250–500 juta; 30% di atas Rp500 juta–5 miliar; dan 35% di atas Rp5 miliar. Tidak mencakup THR/bonus, insentif khusus, masa kerja sebagian tahun, atau pengurang lain.</p>
+                <p>Pemotongan bulanan sebenarnya menggunakan TER pada masa selain masa pajak terakhir; masa terakhir direkonsiliasi dengan pajak tahunan. Sumber: <a href="https://www.pajak.go.id/en/node/74838">UU 7/2021</a> dan <a href="https://stats.pajak.go.id/id/peraturan/petunjuk-pelaksanaan-pemotongan-pajak-atas-penghasilan-sehubungan-dengan-pekerjaan-jasa-1">PMK 168/2023</a> (ditinjau 28 Oktober 2026).</p>
+            </details>
+            <div id="result-pajak" class="result-box" role="status" aria-live="polite" tabindex="-1"></div>
+        </section>
+
+        <!-- Kalkulator Bunga Majemuk --> 
+        <section aria-labelledby="heading-bunga" id="bunga" class="calculator-card">
+            <h2 id="heading-bunga">💵 Kalkulator Bunga Majemuk</h2>
+            <p class="scope">Asumsi nominal tahunan ÷ 12, dimajemukkan bulanan dengan setoran pada akhir bulan. Nilai rupiah belum disesuaikan inflasi. Durasi harus berupa jumlah bulan utuh, maksimal 100 tahun.</p>
+            <div class="form-group">
+                <label for="bunga-modal">Modal Awal (Rp)</label>
+                <input type="number" id="bunga-modal" value="10000000" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="bunga-setoran">Setoran Rutin per Bulan (Rp)</label>
+                <input type="number" id="bunga-setoran" value="1000000" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="bunga-rate">Asumsi imbal hasil nominal per tahun (%)</label>
+                <input type="number" id="bunga-rate" value="12" step="any" min="-99.999" required>
+            </div>
+            <div class="form-group">
+                <label for="bunga-tahun">Jangka Waktu (Tahun)</label>
+                <input type="number" id="bunga-tahun" step="any" value="10" min="0" required>
+            </div>
+            <button type="button" class="btn" onclick="hitungBungaMajemuk()">Hitung Bunga Majemuk</button>
+            <div id="result-bunga" class="result-box" role="status" aria-live="polite" tabindex="-1"></div>
+        </section>
+        <footer>Angka awal hanya contoh input. Perhitungan berjalan di browser dan tidak dikirim atau disimpan. Tampilan rupiah dibulatkan; perhitungan memakai angka sebelum pembulatan. Model sederhana ini bukan nasihat investasi, pinjaman, atau pajak.</footer>
+    </div>
+
+    <script src="calculator.js"></script>
+</body>
+</html>
