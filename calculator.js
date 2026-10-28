@@ -222,3 +222,11 @@ function hitungBungaMajemuk() {
             note: 'Persentase selisih bukan tingkat imbal hasil tahunan atau ukuran yang memperhitungkan waktu setiap setoran.' };
     });
 }
+
+document.addEventListener('input', event => {
+    const panel = event.target.closest('.calculator-card');
+    if (!panel) return;
+    const resultBox = document.getElementById('result-' + panel.id);
+    resultBox.classList.remove('show');
+    resultBox.innerHTML = '';
+});

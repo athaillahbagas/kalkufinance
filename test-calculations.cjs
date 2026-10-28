@@ -5,7 +5,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
-const context = vm.createContext({});
+const eventListeners = {};
+const context = vm.createContext({ document: {
+    addEventListener(type, listener) { eventListeners[type] = listener; }
+} });
 vm.runInContext(fs.readFileSync(path.join(__dirname, 'calculator.js'), 'utf8'), context);
 let passed = 0;
 function test(name, run) {
@@ -189,6 +192,38 @@ test('UI recovers after correction and renders zero-rate outputs without NaN/Inf
     }
     assert.equal(fields['inv-modal'].attributes['aria-invalid'], undefined);
     assert.match(fields['result-pajak'].innerHTML, /bukan potongan PPh 21 bulanan TER/);
+});
+function editField(id, value, panelId) {
+    const field = context.document.getElementById(id);
+    field.value = value;
+    field.closest = selector => selector === '.calculator-card' ? cards.find(card => card.id === panelId) || null : null;
+    if (eventListeners.input) eventListeners.input({ target: field });
+}
+test('editing a number hides only its stale result; recalculation uses the edited value', () => {
+    const loanHTML = fields['result-kredit'].innerHTML;
+    editField('inv-akhir', '2000', 'investasi');
+    assert.equal(fields['result-investasi'].classList.contains('show'), false);
+    assert.equal(fields['result-investasi'].innerHTML, '');
+    assert.equal(fields['result-kredit'].classList.contains('show'), true);
+    assert.equal(fields['result-kredit'].innerHTML, loanHTML);
+    context.hitungInvestasi();
+    assert.equal(fields['result-investasi'].classList.contains('show'), true);
+    assert.match(fields['result-investasi'].innerHTML, /100,00%/);
+});
+test('editing PTKP clears only the tax result and unrelated inputs preserve all results', () => {
+    const investmentHTML = fields['result-investasi'].innerHTML;
+    editField('pajak-status', 'K3', 'pajak');
+    assert.equal(fields['result-pajak'].classList.contains('show'), false);
+    assert.equal(fields['result-pajak'].innerHTML, '');
+    assert.equal(fields['result-investasi'].classList.contains('show'), true);
+    assert.equal(fields['result-investasi'].innerHTML, investmentHTML);
+    context.hitungPajak();
+    assert.equal(fields['result-pajak'].classList.contains('show'), true);
+    assert.match(fields['result-pajak'].innerHTML, /Rp 2\.100\.000/);
+    const taxHTML = fields['result-pajak'].innerHTML;
+    editField('unrelated-field', '42', null);
+    assert.equal(fields['result-pajak'].classList.contains('show'), true);
+    assert.equal(fields['result-pajak'].innerHTML, taxHTML);
 });
 test('entry point has named inputs, a valid doctype, and a legacy link', () => {
     const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
