@@ -35,13 +35,18 @@ The annual tax assumptions follow [UU 7/2021](https://www.pajak.go.id/en/node/74
 
 ## Verification
 
-Run the dependency-free calculation checks with Node.js:
+Run the dependency-free checks with Node.js (the automated workflow uses Node 24):
 
 ```sh
+node --check calculator.js
 node test-calculations.cjs
 ```
 
-The checks cover representative calculations, zero-interest cases, and invalid inputs. They verify the implemented models rather than the suitability of a financial decision.
+The checks cover representative calculations, zero-interest cases, invalid inputs, and clearing outdated results after input edits. They verify the implemented models rather than the suitability of a financial decision.
+
+The [Calculator checks workflow](.github/workflows/calculations.yml) runs the same syntax and calculation commands on pull requests and pushes to `main`; it can also be started manually from Actions. A passing run applies to the commit shown in that run.
+
+For a browser spot check, calculate a result, edit one of that calculator's inputs, and confirm that its previous result clears until recalculated. A result in another calculator panel should remain unchanged.
 
 ## Project scope
 
